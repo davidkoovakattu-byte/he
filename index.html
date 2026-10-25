@@ -1,13 +1,63 @@
-<div style='width:640px;height:480px;max-width:100%'>
-    <div id='game'></div>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ocarina of Time Emulator</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101710;color:#f4f6f0;font:16px system-ui,Arial,sans-serif}
+main{max-width:1100px;margin:auto;padding:20px}h1{color:#d9f1a6;margin:0 0 8px}
+p{line-height:1.5;color:#d3dbd0}.panel{background:#1b281e;border:1px solid #405541;border-radius:12px;padding:16px;margin:16px 0}
+button{background:#d9f1a6;color:#172014;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+input{max-width:100%;margin:10px 0}#game{width:100%;height:min(72vh,720px);min-height:420px;background:#000;border-radius:10px;overflow:hidden}
+.status{color:#d9f1a6;margin-top:10px}small{color:#b9c6b8}
+</style>
+</head>
+<body>
+<main>
+<h1>The Legend of Zelda: Ocarina of Time</h1>
+<div class="panel">
+  <strong>Start the game</strong>
+  <p>Choose your own legally obtained Ocarina of Time ROM file, then press Start. The ROM is loaded locally in your browser; this page does not upload it.</p>
+  <input id="rom" type="file" accept=".z64,.n64,.v64,.zip,application/octet-stream">
+  <button id="start">Start game</button>
+  <div id="status" class="status">Choose your .z64 file to begin.</div>
 </div>
- 
-<script type='text/javascript'>
- 
-    EJS_player = '#game';
-    EJS_core = 'gba';  
-    EJS_gameUrl = 'zelda.gba';
-    EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/ethanaobrien/emulatorjs@main/data/';
- 
+<div id="game"></div>
+<div class="panel">
+<strong>Save and load</strong>
+<p>Open the EmulatorJS toolbar/menu and choose <b>Save State</b> to download a save-state file, or <b>Load State</b> to load one you saved earlier. You can also use the game's normal in-game save feature.</p>
+<p><small>Save states are tied to the same game and emulator core. Keep a copy of your state files somewhere safe.</small></p>
+</div>
+</main>
+<script>
+const romInput = document.getElementById('rom');
+const startButton = document.getElementById('start');
+const status = document.getElementById('status');
+let started = false, romObjectUrl = null;
+startButton.addEventListener('click', () => {
+  const file = romInput.files && romInput.files[0];
+  if (!file) { status.textContent = 'Select your .z64 ROM file first.'; return; }
+  if (started) { status.textContent = 'Already started. Refresh this page to restart.'; return; }
+  romObjectUrl = URL.createObjectURL(file);
+  window.EJS_player = '#game';
+  window.EJS_core = 'n64';
+  window.EJS_gameUrl = romObjectUrl;
+  window.EJS_gameName = 'Ocarina of Time';
+  window.EJS_gameID = 1;
+  window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+  window.EJS_startOnLoaded = true;
+  window.EJS_ready = function() {
+    status.textContent = 'Emulator ready. Use the emulator menu for controls and save states.';
+  };
+  const loader = document.createElement('script');
+  loader.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  loader.onerror = () => { status.textContent = 'Could not load EmulatorJS. Check your internet connection and try again.'; };
+  document.body.appendChild(loader);
+  started = true;
+  startButton.disabled = true;
+  status.textContent = 'Loading emulator… the first launch may take a little while.';
+});
 </script>
-<script src='https://cdn.jsdelivr.net/gh/ethanaobrien/emulatorjs@main/data/loader.js'></script>
+</body>
+</html>
